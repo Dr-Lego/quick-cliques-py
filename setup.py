@@ -49,7 +49,7 @@ if "quick_cliques" in packages and "quick_cliques.bin" not in packages:
 
 setup(
     name="quick-cliques",
-    version="0.1.0",
+    version="0.1.1",
     author="Raphael Engel",
     author_email="hello AT alpharee DOT de",
     description="A Python module for finding maximal cliques in graphs",

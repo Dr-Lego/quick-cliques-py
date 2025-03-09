@@ -18,7 +18,7 @@ except ImportError:
 
 def find_cliques(
     graph: Union[np.ndarray, List[List[int]]],
-    algorithm: Literal["tomita", "adjlist", "degeneracy", "hybrid"],
+    algorithm: Literal["tomita", "adjlist", "degeneracy", "hybrid"] = "degeneracy",
 ) -> List[List[int]]:
     """
     Run the specified clique finding algorithm on the given graph.

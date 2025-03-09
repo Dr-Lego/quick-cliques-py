@@ -7,4 +7,4 @@ allowing users to find all maximal cliques in a graph using various algorithms.
 
 from .quick_cliques import find_cliques
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
