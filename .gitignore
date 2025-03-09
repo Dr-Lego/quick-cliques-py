@@ -1,0 +1,7 @@
+# Build and distribution files
+build/
+*.egg-info/
+__pycache__/
+*.so
+*.o
+*.a

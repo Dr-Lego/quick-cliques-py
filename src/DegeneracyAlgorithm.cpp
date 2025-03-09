@@ -1,16 +1,16 @@
-/* 
-    This program is free software: you can redistribute it and/or modify 
-    it under the terms of the GNU General Public License as published by 
-    the Free Software Foundation, either version 3 of the License, or 
-    (at your option) any later version. 
- 
-    This program is distributed in the hope that it will be useful, 
-    but WITHOUT ANY WARRANTY; without even the implied warranty of 
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the 
-    GNU General Public License for more details. 
- 
-    You should have received a copy of the GNU General Public License 
-    along with this program.  If not, see <http://www.gnu.org/licenses/> 
+/*
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 
 #include <limits.h>
@@ -51,22 +51,22 @@ using namespace std;
     and http://dx.doi.org/10.1007/978-3-642-17517-6_36
 
     This algorithm first orders the vertices in a degeneracy order (vertices
-    are removed from the graph in order by degree in the remaining subgraph 
+    are removed from the graph in order by degree in the remaining subgraph
     and placed in this order in the ordering).
 
     We then recursively call a modified version of the algorithm of Tomita et
     al. (2006) http://dx.doi.org/10.1016/j.tcs.2006.06.015, for each vertex
     v in the ordering, where R = {v}, P = v's neighbors that are after v
-    in the degneracy order, and X = v's neighbors that are before v 
+    in the degneracy order, and X = v's neighbors that are before v
     in the degeneracy order.
 
-    This is a recursive backtracking algorithm that maintains three 
+    This is a recursive backtracking algorithm that maintains three
     sets of vertices, R, a partial clique, P, the common neighbors
     of vertices in R that are candidates to add to the partial clique,
-    and X, the set of common neighbors of R that have been listed 
+    and X, the set of common neighbors of R that have been listed
     in a maximal clique with R already.
 
-    The algorithm recursively adds vertices to R from P, then 
+    The algorithm recursively adds vertices to R from P, then
     updates the sets P and X to be the new common neighbors of R
     and recurses. When P and X are empty, R is a maximal clique,
     and is reported.
@@ -79,7 +79,7 @@ using namespace std;
     that come later in the degeneracy order is expected to be small. Then
     testing for neighbors in this way should be fast.
 
-    Besides the ordering, this algorithm includes more efficient 
+    Besides the ordering, this algorithm includes more efficient
     pivot computation for sparse graphs.
     To find a "good" pivot, we must find the vertex in P union X that
     has the most neighbors in P. We accompish this step by maintaining
@@ -106,35 +106,46 @@ DegeneracyAlgorithm::~DegeneracyAlgorithm()
 
 long DegeneracyAlgorithm::Run(list<list<int>> &cliques)
 {
-    return listAllMaximalCliquesDegeneracy(m_AdjacencyList, m_AdjacencyList.size());
+    // Add a callback to store cliques in the provided list
+    auto storeCliqueInList = [&cliques](list<int> const &clique) {
+        cliques.push_back(clique);
+    };
+
+    // Add the callback to the algorithm
+    AddCallBack(storeCliqueInList);
+
+    // Run the algorithm
+    long result = listAllMaximalCliquesDegeneracy(m_AdjacencyList, m_AdjacencyList.size());
+
+    return result;
 }
 
 
 /*! \brief Computes the vertex v in P union X that has the most neighbors in P,
-           and places P \ {neighborhood of v} in an array. These are the 
+           and places P \ {neighborhood of v} in an array. These are the
            vertices to consider adding to the partial clique during the current
            recursive call of the algorithm.
 
-    \param pivotNonNeighbors  An intially unallocated pointer, which will contain the set 
+    \param pivotNonNeighbors  An intially unallocated pointer, which will contain the set
                               P \ {neighborhood of v} when this function completes.
 
     \param numNonNeighbors A pointer to a single integer, which has been preallocated,
                            which will contain the number of elements in pivotNonNeighbors.
- 
+
     \param vertexSets An array containing sets of vertices divided into sets X, P, R, and other.
- 
-    \param vertexLookup A lookup table indexed by vertex number, storing the index of that 
+
+    \param vertexLookup A lookup table indexed by vertex number, storing the index of that
                         vertex in vertexSets.
 
-    \param neighborsInP Maps vertices to arrays of neighbors such that 
+    \param neighborsInP Maps vertices to arrays of neighbors such that
                         neighbors in P fill the first cells
 
     \param numNeighbors An the neighbor of neighbors a vertex had in P,
-                        the first time this function is called, this bound is 
+                        the first time this function is called, this bound is
                         used to keep us from allocating more than linear space.
- 
+
     \param beginX The index where set X begins in vertexSets.
- 
+
     \param beginP The index where set P begins in vertexSets.
 
     \param beginR The index where set R begins in vertexSets.
@@ -150,7 +161,7 @@ inline int findBestPivotNonNeighborsDegeneracy( int** pivotNonNeighbors, int* nu
     int pivot = -1;
     int maxIntersectionSize = -1;
 
-    // iterate over each vertex in P union X 
+    // iterate over each vertex in P union X
     // to find the vertex with the most neighbors in P.
     int j = beginX;
     while(j<beginR)
@@ -190,7 +201,7 @@ inline int findBestPivotNonNeighborsDegeneracy( int** pivotNonNeighbors, int* nu
     // compute non neighbors of pivot by marking its neighbors
     // and moving non-marked vertices into pivotNonNeighbors.
     // we must do this because this is an efficient way
-    // to compute non-neighbors of a vertex in 
+    // to compute non-neighbors of a vertex in
     // an adjacency list.
 
     // we initialize enough space for all of P; this is
@@ -247,7 +258,7 @@ inline int findBestPivotNonNeighborsDegeneracy( int** pivotNonNeighbors, int* nu
 ////
 ////    timeComputingPivot += (clockEnd - clockStart);
 
-    return pivot; 
+    return pivot;
 }
 
 /*! \brief Move vertex to R, set P to vertex's later neighbors and
@@ -258,28 +269,28 @@ inline int findBestPivotNonNeighborsDegeneracy( int** pivotNonNeighbors, int* nu
     \param orderNumber The position of vertex in the ordering.
 
     \param vertexSets An array containing sets of vertices divided into sets X, P, and other.
- 
-    \param vertexLookup A lookup table indexed by vertex number, storing the index of that 
+
+    \param vertexLookup A lookup table indexed by vertex number, storing the index of that
                         vertex in vertexSets.
 
     \param orderingArray A degeneracy order of the input graph.
 
-    \param neighborsInP Maps vertices to arrays of neighbors such that 
+    \param neighborsInP Maps vertices to arrays of neighbors such that
                         neighbors in P fill the first cells
 
     \param numNeighbors An the neighbor of neighbors a vertex had in P,
-                        the first time this function is called, this bound is 
+                        the first time this function is called, this bound is
                         used to keep us from allocating more than linear space.
- 
+
     \param pBeginX The index where set X begins in vertexSets.
- 
+
     \param pBeginP The index where set P begins in vertexSets.
 
     \param pBeginR The index where set R begins in vertexSets.
 
     \param pNewBeginX After function, contains the new index where set X begins
                       in vertexSets after adding vertex to R.
- 
+
     \param pNewBeginP After function, contains the new index where set P begins
                       in vertexSets after adding vertex to P.
 
@@ -288,10 +299,10 @@ inline int findBestPivotNonNeighborsDegeneracy( int** pivotNonNeighbors, int* nu
 */
 
 inline void fillInPandXForRecursiveCallDegeneracy( int vertex, int orderNumber,
-                                                   int* vertexSets, int* vertexLookup, 
+                                                   int* vertexSets, int* vertexLookup,
                                                    NeighborListArray** orderingArray,
                                                    int** neighborsInP, int* numNeighbors,
-                                                   int* pBeginX, int *pBeginP, int *pBeginR, 
+                                                   int* pBeginX, int *pBeginP, int *pBeginR,
                                                    int* pNewBeginX, int* pNewBeginP, int *pNewBeginR)
 {
 ////        clock_t startClock = clock();
@@ -320,7 +331,7 @@ inline void fillInPandXForRecursiveCallDegeneracy( int vertex, int orderNumber,
             vertexSets[*pNewBeginP] = neighbor;
             vertexLookup[neighbor] = *pNewBeginP;
 
-            j++; 
+            j++;
         }
 
         *pNewBeginX = *pNewBeginP;
@@ -357,7 +368,7 @@ inline void fillInPandXForRecursiveCallDegeneracy( int vertex, int orderNumber,
                 k++;
             }
 
-            j++; 
+            j++;
 
         }
 
@@ -368,8 +379,8 @@ inline void fillInPandXForRecursiveCallDegeneracy( int vertex, int orderNumber,
             int vertexInP = vertexSets[j];
             numNeighbors[vertexInP] = 0;
             Free(neighborsInP[vertexInP]);
-            neighborsInP[vertexInP]=(int*)Calloc( min( *pNewBeginR-*pNewBeginP, 
-                                                 orderingArray[vertexInP]->laterDegree 
+            neighborsInP[vertexInP]=(int*)Calloc( min( *pNewBeginR-*pNewBeginP,
+                                                 orderingArray[vertexInP]->laterDegree
                                                + orderingArray[vertexInP]->earlierDegree), sizeof(int));
 
             j++;
@@ -410,7 +421,7 @@ inline void fillInPandXForRecursiveCallDegeneracy( int vertex, int orderNumber,
 
     \param adjList An array of linked lists, representing the input graph in the
                    "typical" adjacency list format.
- 
+
     \param degree An array, indexed by vertex, containing the degree of that vertex. (not currently used)
 
     \param size The number of vertices in the graph.
@@ -433,7 +444,7 @@ long DegeneracyAlgorithm::listAllMaximalCliquesDegeneracy(vector<list<int>> cons
 
     int** neighborsInP = (int**)Calloc(size, sizeof(int*));
     int* numNeighbors = (int*)Calloc(size, sizeof(int));
-    
+
     // compute the degeneracy order
 ////    clock_t clockStart = clock();
     NeighborListArray** orderingArray = computeDegeneracyOrderArray(adjList, size);
@@ -475,20 +486,20 @@ long DegeneracyAlgorithm::listAllMaximalCliquesDegeneracy(vector<list<int>> cons
 
         // set P to be later neighbors and X to be be earlier neighbors
         // of vertex
-        fillInPandXForRecursiveCallDegeneracy( i, vertex, 
-                                               vertexSets, vertexLookup, 
+        fillInPandXForRecursiveCallDegeneracy( i, vertex,
+                                               vertexSets, vertexLookup,
                                                orderingArray,
                                                neighborsInP, numNeighbors,
-                                               &beginX, &beginP, &beginR, 
+                                               &beginX, &beginP, &beginR,
                                                &newBeginX, &newBeginP, &newBeginR);
 
         // recursively compute maximal cliques containing vertex, some of its
         // later neighbors, and avoiding earlier neighbors
         listAllMaximalCliquesDegeneracyRecursive(&cliqueCount,
-                                                  partialClique, 
+                                                  partialClique,
                                                   vertexSets, vertexLookup,
                                                   neighborsInP, numNeighbors,
-                                                  newBeginX, newBeginP, newBeginR); 
+                                                  newBeginX, newBeginP, newBeginR);
 
         #ifdef PRINT_CLIQUES_TOMITA_STYLE
         printf("b ");
@@ -533,26 +544,26 @@ long DegeneracyAlgorithm::listAllMaximalCliquesDegeneracy(vector<list<int>> cons
     \param vertex The vertex to move to R.
 
     \param vertexSets An array containing sets of vertices divided into sets X, P, R, and other.
- 
-    \param vertexLookup A lookup table indexed by vertex number, storing the index of that 
+
+    \param vertexLookup A lookup table indexed by vertex number, storing the index of that
                         vertex in vertexSets.
 
-    \param neighborsInP Maps vertices to arrays of neighbors such that 
+    \param neighborsInP Maps vertices to arrays of neighbors such that
                         neighbors in P fill the first cells
 
     \param numNeighbors An the neighbor of neighbors a vertex had in P,
-                        the first time this function is called, this bound is 
+                        the first time this function is called, this bound is
                         used to keep us from allocating more than linear space.
 
     \param pBeginX The index where set X begins in vertexSets.
- 
+
     \param pBeginP The index where set P begins in vertexSets.
 
     \param pBeginR The index where set R begins in vertexSets.
 
     \param pNewBeginX After function, contains the new index where set X begins
                       in vertexSets after adding vertex to R.
- 
+
     \param pNewBeginP After function, contains the new index where set P begins
                       in vertexSets after adding vertex to P.
 
@@ -560,10 +571,10 @@ long DegeneracyAlgorithm::listAllMaximalCliquesDegeneracy(vector<list<int>> cons
                       in vertexSets after adding vertex to R.
 */
 
-inline void moveToRDegeneracy( int vertex, 
-                               int* vertexSets, int* vertexLookup, 
+inline void moveToRDegeneracy( int vertex,
+                               int* vertexSets, int* vertexLookup,
                                int** neighborsInP, int* numNeighbors,
-                               int* pBeginX, int *pBeginP, int *pBeginR, 
+                               int* pBeginX, int *pBeginP, int *pBeginR,
                                int* pNewBeginX, int* pNewBeginP, int *pNewBeginR)
 {
 
@@ -605,7 +616,7 @@ inline void moveToRDegeneracy( int vertex,
                     vertexLookup[neighbor] = (*pNewBeginX);
                     incrementJ=0;
                 }
-                
+
                 k++;
             }
 
@@ -676,20 +687,20 @@ inline void moveToRDegeneracy( int vertex,
     \param vertex The vertex to move from R to X.
 
     \param vertexSets An array containing sets of vertices divided into sets X, P, R, and other.
- 
-    \param vertexLookup A lookup table indexed by vertex number, storing the index of that 
+
+    \param vertexLookup A lookup table indexed by vertex number, storing the index of that
                         vertex in vertexSets.
 
     \param pBeginX The index where set X begins in vertexSets.
- 
+
     \param pBeginP The index where set P begins in vertexSets.
 
     \param pBeginR The index where set R begins in vertexSets.
 
 */
 
-inline void moveFromRToXDegeneracy( int vertex, 
-                                    int* vertexSets, int* vertexLookup, 
+inline void moveFromRToXDegeneracy( int vertex,
+                                    int* vertexSets, int* vertexLookup,
                                     int* pBeginX, int* pBeginP, int* pBeginR )
 {
 ////    clock_t clockStart = clock();
@@ -712,26 +723,26 @@ inline void moveFromRToXDegeneracy( int vertex,
 /*! \brief Recursively list all maximal cliques containing all of
            all vertices in R, some vertices in P and no vertices in X.
 
-    \param cliqueCount A pointer to the number of maximal cliques computed 
+    \param cliqueCount A pointer to the number of maximal cliques computed
                        thus far.
 
     \param partialClique A linked list storing R, the partial clique for this
-                         recursive call. 
+                         recursive call.
 
     \param vertexSets An array containing sets of vertices divided into sets X, P, R and other.
- 
-    \param vertexLookup A lookup table indexed by vertex number, storing the index of that 
+
+    \param vertexLookup A lookup table indexed by vertex number, storing the index of that
                         vertex in vertexSets.
 
-    \param neighborsInP Maps vertices to arrays of neighbors such that 
+    \param neighborsInP Maps vertices to arrays of neighbors such that
                         neighbors in P fill the first cells
 
     \param numNeighbors An the neighbor of neighbors a vertex had in P,
-                        the first time this function is called, this bound is 
+                        the first time this function is called, this bound is
                         used to keep us from allocating more than linear space.
 
     \param beginX The index where set X begins in vertexSets.
- 
+
     \param beginP The index where set P begins in vertexSets.
 
     \param beginR The index where set R begins in vertexSets.
@@ -739,7 +750,7 @@ inline void moveFromRToXDegeneracy( int vertex,
 */
 
 void DegeneracyAlgorithm::listAllMaximalCliquesDegeneracyRecursive(long* cliqueCount,
-                                               list<int> &partialClique, 
+                                               list<int> &partialClique,
                                                int* vertexSets, int* vertexLookup,
                                                int** neighborsInP, int* numNeighbors,
                                                int beginX, int beginP, int beginR)
@@ -782,7 +793,7 @@ void DegeneracyAlgorithm::listAllMaximalCliquesDegeneracyRecursive(long* cliqueC
                                          neighborsInP, numNeighbors,
                                          beginX, beginP, beginR);
 
-    // add candiate vertices to the partial clique one at a time and 
+    // add candiate vertices to the partial clique one at a time and
     // search for maximal cliques
     if(numCandidatesToIterateThrough != 0)
     {
@@ -801,16 +812,16 @@ void DegeneracyAlgorithm::listAllMaximalCliquesDegeneracyRecursive(long* cliqueC
         // add vertex into partialClique, representing R.
         partialClique.push_back(vertex);
 
-        // swap vertex into R and update all data structures 
-        moveToRDegeneracy( vertex, 
-                           vertexSets, vertexLookup, 
+        // swap vertex into R and update all data structures
+        moveToRDegeneracy( vertex,
+                           vertexSets, vertexLookup,
                            neighborsInP, numNeighbors,
-                           &beginX, &beginP, &beginR, 
+                           &beginX, &beginP, &beginR,
                            &newBeginX, &newBeginP, &newBeginR);
 
         // recursively compute maximal cliques with new sets R, P and X
         listAllMaximalCliquesDegeneracyRecursive(cliqueCount,
-                                                 partialClique, 
+                                                 partialClique,
                                                  vertexSets, vertexLookup,
                                                  neighborsInP, numNeighbors,
                                                  newBeginX, newBeginP, newBeginR);
@@ -822,7 +833,7 @@ void DegeneracyAlgorithm::listAllMaximalCliquesDegeneracyRecursive(long* cliqueC
         // remove vertex from partialClique
         partialClique.pop_back();
 
-        moveFromRToXDegeneracy( vertex, 
+        moveFromRToXDegeneracy( vertex,
                                 vertexSets, vertexLookup,
                                 &beginX, &beginP, &beginR );
 

@@ -82,9 +82,20 @@ TomitaAlgorithm::~TomitaAlgorithm()
 
 long TomitaAlgorithm::Run(list<list<int>> &cliques)
 {
-    return listAllMaximalCliquesMatrix(
+    // Add a callback to store cliques in the provided list
+    auto storeCliqueInList = [&cliques](list<int> const &clique) {
+        cliques.push_back(clique);
+    };
+    
+    // Add the callback to the algorithm
+    AddCallBack(storeCliqueInList);
+    
+    // Run the algorithm
+    long result = listAllMaximalCliquesMatrix(
                 m_ppAdjacencyMatrix,
                 m_iNumVertices);
+    
+    return result;
 }
 
 /*! \brief List all maximal cliques in a given graph using the algorithm

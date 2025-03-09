@@ -1,7 +1,7 @@
 
 BUILD_DIR = build
 SRC_DIR   = src
-BIN_DIR   = bin
+BIN_DIR   = quick_cliques/bin
 
 CFLAGS = -Winline -O2 -std=c++11 -g
 #CFLAGS = -Winline -DDEBUG_MESSAGE -O0 -std=c++0x -g
@@ -30,7 +30,7 @@ EXECS = $(addprefix $(BIN_DIR)/, $(EXEC_NAMES))
 
 #DEFINE += -DDEBUG       #for debugging
 #DEFINE += -DMEMORY_DEBUG #for memory debugging.
-#DEFINE += -DPRINT_CLIQUES_ONE_BY_ONE   #print cliques, one per line
+DEFINE += -DPRINT_CLIQUES_ONE_BY_ONE   #print cliques, one per line
 
 # print cliques in tree-like format:
 #  - print each vertex that's evaluated

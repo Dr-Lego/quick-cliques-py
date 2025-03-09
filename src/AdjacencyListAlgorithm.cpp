@@ -85,12 +85,23 @@ AdjacencyListAlgorithm::~AdjacencyListAlgorithm()
     delete[] m_pDegree;
 }
 
-long AdjacencyListAlgorithm::Run(std::list<std::list<int>> &cliques)
+long AdjacencyListAlgorithm::Run(list<list<int>> &cliques)
 {
-    return listAllMaximalCliquesAdjacencyList(
+    // Add a callback to store cliques in the provided list
+    auto storeCliqueInList = [&cliques](list<int> const &clique) {
+        cliques.push_back(clique);
+    };
+    
+    // Add the callback to the algorithm
+    AddCallBack(storeCliqueInList);
+    
+    // Run the algorithm
+    long result = listAllMaximalCliquesAdjacencyList(
                 m_AdjacencyList,
                 m_pDegree,
                 m_AdjacencyList.size());
+    
+    return result;
 }
 
 /*! \brief List all maximal cliques in a given graph using the algorithm
